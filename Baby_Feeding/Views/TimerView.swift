@@ -4,7 +4,7 @@ import UserNotifications
 
 struct TimerView: View {
     @Binding var feedingTimes: [Date]
-    @Binding var feedingInterval: Int
+    var feedingInterval: Int
     @State private var elapsedTime: String = "00:00:00"
     @State private var timerSubscription: AnyCancellable?
     @State private var buttonColor: Color = .green
@@ -21,7 +21,7 @@ struct TimerView: View {
                     saveFeedingTimes()
                     updateElapsedTime()
                     startTimer()
-                    scheduleNotification(for: now)
+                    scheduleNotification()
                 }
             }) {
                 Text(elapsedTime)
@@ -40,6 +40,7 @@ struct TimerView: View {
                 loadFeedingTimes()
                 updateElapsedTime()
                 startTimer()
+                scheduleNotification()
             }
             .background(Color.white.ignoresSafeArea())
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("UpdateElapsedTime"))) { _ in
@@ -60,17 +61,19 @@ struct TimerView: View {
         }
     }
 
-    private func scheduleNotification(for date: Date) {
+    private func scheduleNotification() {
         // Remove all pending notifications
         UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+
+        guard let lastFeedTime = lastFeedTime else { return }
 
         let content = UNMutableNotificationContent()
         content.title = "Time to Feed"
         content.body = "It's been \(feedingInterval) hours since the last feeding."
         content.sound = UNNotificationSound.default
 
-        let triggerDate = Calendar.current.date(byAdding: .hour, value: feedingInterval, to: date)!
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: triggerDate.timeIntervalSinceNow, repeats: false)
+        let nextFeedingTime = Calendar.current.date(byAdding: .hour, value: feedingInterval, to: lastFeedTime)!
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: nextFeedingTime.timeIntervalSinceNow, repeats: false)
         
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
         UNUserNotificationCenter.current().add(request) { error in
@@ -116,6 +119,12 @@ struct TimerView: View {
         timerSubscription?.cancel()
         timerSubscription = Timer.publish(every: 1, on: .main, in: .common).autoconnect().sink { _ in
             updateElapsedTime()
+            if let lastFeedTime = lastFeedTime {
+                let interval = Date().timeIntervalSince(lastFeedTime)
+                if Int(interval) >= feedingInterval * 3600 {
+                    scheduleNotification()
+                }
+            }
         }
     }
 }

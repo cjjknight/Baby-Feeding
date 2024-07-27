@@ -25,7 +25,7 @@ struct ContentView: View {
                 .frame(width: 150, height: 150)
                 .padding(.bottom, 40)
 
-            TimerView(feedingTimes: $feedingTimes, feedingInterval: $feedingInterval)
+            TimerView(feedingTimes: $feedingTimes, feedingInterval: feedingInterval) // Pass the wrapped value
             Spacer()
 
             TimelineView(feedingTimes: $feedingTimes) {
@@ -38,7 +38,7 @@ struct ContentView: View {
             }
         }
         .sheet(isPresented: $showingSettings) {
-            SettingsView(feedingInterval: $feedingInterval)
+            SettingsView(feedingInterval: $feedingInterval) // Pass the binding for settings
         }
     }
 }
