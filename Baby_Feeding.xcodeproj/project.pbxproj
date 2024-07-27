@@ -86,6 +86,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8B847F572C557B430058A032 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				8B89CB4B2C3A30C300E29E46 /* ContentView.swift */,
+				8B89CB762C3A314100E29E46 /* TimerView.swift */,
+				8B89CB782C3A315800E29E46 /* TimelineView.swift */,
+				8B92B7482C3E0379007B2659 /* SettingsView.swift */,
+				8B89CB7C2C3A316F00E29E46 /* EditFeedingView.swift */,
+				8B89CB7A2C3A316200E29E46 /* FeedingsListView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
 		8B89CB3D2C3A30C300E29E46 = {
 			isa = PBXGroup;
 			children = (
@@ -110,13 +123,8 @@
 			isa = PBXGroup;
 			children = (
 				8B89CB492C3A30C300E29E46 /* Baby_FeedingApp.swift */,
-				8B89CB4B2C3A30C300E29E46 /* ContentView.swift */,
-				8B89CB762C3A314100E29E46 /* TimerView.swift */,
-				8B89CB782C3A315800E29E46 /* TimelineView.swift */,
-				8B92B7482C3E0379007B2659 /* SettingsView.swift */,
+				8B847F572C557B430058A032 /* Views */,
 				8B89CB7E2C3A31A000E29E46 /* Utility.swift */,
-				8B89CB7C2C3A316F00E29E46 /* EditFeedingView.swift */,
-				8B89CB7A2C3A316200E29E46 /* FeedingsListView.swift */,
 				8B89CB4D2C3A30C300E29E46 /* Item.swift */,
 				8B89CB4F2C3A30C400E29E46 /* Assets.xcassets */,
 				8B89CB512C3A30C400E29E46 /* Baby_Feeding.entitlements */,
@@ -448,7 +456,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Baby_Feeding/Preview Content\"";
-				DEVELOPMENT_TEAM = W4G9ZP2W23;
+				DEVELOPMENT_TEAM = HDT29XX2Q2;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -486,7 +494,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"Baby_Feeding/Preview Content\"";
-				DEVELOPMENT_TEAM = W4G9ZP2W23;
+				DEVELOPMENT_TEAM = HDT29XX2Q2;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
