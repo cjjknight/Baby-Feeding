@@ -10,7 +10,29 @@ struct FeedingsListView: View {
     var body: some View {
         NavigationView {
             List {
-                ForEach(feedingTimes, id: \.self) { feedingTime in
+                // Add new feeding button at the top
+                Button(action: {
+                    showingAddFeeding.toggle()
+                }) {
+                    Text("Add New Feeding")
+                        .foregroundColor(.blue)
+                }
+                .sheet(isPresented: $showingAddFeeding) {
+                    VStack {
+                        DatePicker("Feeding Time", selection: $newFeedingDate)
+                        Button("Add") {
+                            feedingTimes.append(newFeedingDate)
+                            feedingTimes.sort(by: >)
+                            saveFeedingTimes()
+                            NotificationCenter.default.post(name: NSNotification.Name("UpdateElapsedTime"), object: nil)
+                            showingAddFeeding = false
+                        }
+                    }
+                    .padding()
+                }
+
+                // Display feeding times in reverse order
+                ForEach(feedingTimes.sorted(by: >), id: \.self) { feedingTime in
                     Button(action: {
                         selectedFeedingTime = feedingTime
                         showingEditFeeding.toggle()
@@ -19,26 +41,6 @@ struct FeedingsListView: View {
                     }
                 }
                 .onDelete(perform: deleteFeeding)
-
-                Button(action: {
-                    showingAddFeeding.toggle()
-                }) {
-                    Text("Add Missed Feeding")
-                        .foregroundColor(.blue)
-                }
-                .sheet(isPresented: $showingAddFeeding) {
-                    VStack {
-                        DatePicker("Feeding Time", selection: $newFeedingDate)
-                        Button("Add") {
-                            feedingTimes.append(newFeedingDate)
-                            feedingTimes.sort()
-                            saveFeedingTimes()
-                            NotificationCenter.default.post(name: NSNotification.Name("UpdateElapsedTime"), object: nil)
-                            showingAddFeeding = false
-                        }
-                    }
-                    .padding()
-                }
             }
             .navigationTitle("Feeding Times")
             .sheet(isPresented: $showingEditFeeding) {
