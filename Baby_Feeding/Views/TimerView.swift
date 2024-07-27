@@ -14,10 +14,10 @@ struct TimerView: View {
         VStack {
             Button(action: {
                 let now = Date()
-                if let lastFeeding = feedingTimes.last, now.timeIntervalSince(lastFeeding) < 300 {
+                if let lastFeeding = feedingTimes.first, now.timeIntervalSince(lastFeeding) < 300 {
                     showingAlert = true
                 } else {
-                    feedingTimes.append(now)
+                    feedingTimes.insert(now, at: 0) // Insert at the beginning
                     saveFeedingTimes()
                     updateElapsedTime()
                     startTimer()
@@ -38,6 +38,7 @@ struct TimerView: View {
             .onAppear {
                 requestNotificationPermission()
                 loadFeedingTimes()
+                feedingTimes.sort(by: >)
                 updateElapsedTime()
                 startTimer()
                 scheduleNotification()
@@ -50,7 +51,7 @@ struct TimerView: View {
     }
 
     private var lastFeedTime: Date? {
-        feedingTimes.last
+        feedingTimes.first
     }
 
     private func requestNotificationPermission() {
@@ -73,7 +74,11 @@ struct TimerView: View {
         content.sound = UNNotificationSound.default
 
         let nextFeedingTime = Calendar.current.date(byAdding: .hour, value: feedingInterval, to: lastFeedTime)!
-        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: nextFeedingTime.timeIntervalSinceNow, repeats: false)
+
+        let timeInterval = nextFeedingTime.timeIntervalSinceNow
+        guard timeInterval > 0 else { return } // Ensure the time interval is greater than zero
+
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: timeInterval, repeats: false)
         
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
         UNUserNotificationCenter.current().add(request) { error in
