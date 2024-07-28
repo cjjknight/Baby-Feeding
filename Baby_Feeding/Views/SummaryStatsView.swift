@@ -3,92 +3,135 @@ import Charts
 
 struct SummaryStatsView: View {
     @Binding var feedingTimes: [Date]
-    
+    @State private var chartViewType: ChartViewType = .weekly
+    @State private var isFullScreen: Bool = false
+    @State private var fullScreenTitle: String = ""
+
     var body: some View {
-        ScrollView {
-            VStack {
-                Text("Summary Stats")
-                    .font(.largeTitle)
-                    .padding()
-
-                // Number of Meals Graph
-                Text("Number of Meals (Past 7 Days)")
-                    .font(.headline)
-                    .padding(.top)
-                Chart {
-                    ForEach(summaryStatsByDay().suffix(7), id: \.date) { stat in
-                        BarMark(
-                            x: .value("Date", stat.date, unit: .day),
-                            y: .value("Number of Meals", stat.numberOfMeals)
-                        )
-                    }
-                }
-                .chartXAxis {
-                    AxisMarks(values: .stride(by: .day, count: 1)) { value in
-                        AxisValueLabel(format: .dateTime.weekday())
-                    }
-                }
-                .frame(height: 200)
-
-                // Percentage of Meals Between 10am and 7pm Graph
-                Text("Percentage of Meals Between 10am-7pm (Past 7 Days)")
-                    .font(.headline)
-                    .padding(.top)
-                Chart {
-                    ForEach(summaryStatsByDay().suffix(7), id: \.date) { stat in
-                        BarMark(
-                            x: .value("Date", stat.date, unit: .day),
-                            y: .value("Percentage", stat.percentageOfMealsBetween10amAnd7pm)
-                        )
-                    }
-                }
-                .chartYAxis {
-                    AxisMarks(values: .stride(by: 10)) { value in
-                        AxisValueLabel("\(value.as(Int.self) ?? 0)%")
-                    }
-                }
-                .chartXAxis {
-                    AxisMarks(values: .stride(by: .day, count: 1)) { value in
-                        AxisValueLabel(format: .dateTime.weekday())
-                    }
-                }
-                .frame(height: 200)
-
-                // Longest Stretch Between Meals Graph
-                Text("Longest Stretch Between Meals (Past 7 Days)")
-                    .font(.headline)
-                    .padding(.top)
-                Chart {
-                    ForEach(summaryStatsByDay().suffix(7), id: \.date) { stat in
-                        BarMark(
-                            x: .value("Date", stat.date, unit: .day),
-                            y: .value("Hours", stat.longestStretchBetweenMeals)
-                        )
-                    }
-                }
-                .chartXAxis {
-                    AxisMarks(values: .stride(by: .day, count: 1)) { value in
-                        AxisValueLabel(format: .dateTime.weekday())
-                    }
-                }
-                .frame(height: 200)
-
-                List {
-                    ForEach(summaryStatsByDay().reversed(), id: \.date) { stat in
-                        VStack(alignment: .leading) {
-                            Text("Date: \(stat.date, formatter: dateFormatter)")
-                                .font(.headline)
-                            Text("Number of Meals: \(stat.numberOfMeals)")
-                            Text("Percentage of Meals Between 10am-7pm: \(stat.percentageOfMealsBetween10amAnd7pm, specifier: "%.2f")%")
-                            Text("Longest Stretch Between Meals: \(stat.longestStretchBetweenMeals, specifier: "%.2f") hours")
+        VStack {
+            if isFullScreen {
+                fullScreenChart
+            } else {
+                ScrollView {
+                    VStack {
+                        Text("Summary Stats")
+                            .font(.largeTitle)
+                            .padding()
+                        
+                        // Number of Meals Graph
+                        chartView(title: "Number of Meals", valueType: .numberOfMeals)
+                        
+                        // Percentage of Meals Between 10am and 7pm Graph
+                        chartView(title: "Percentage of Meals Between 10am-7pm", valueType: .percentageOfMealsBetween10amAnd7pm)
+                        
+                        // Longest Stretch Between Meals Graph
+                        chartView(title: "Longest Stretch Between Meals", valueType: .longestStretchBetweenMeals)
+                        
+                        List {
+                            ForEach(summaryStatsByDay().reversed(), id: \.date) { stat in
+                                VStack(alignment: .leading) {
+                                    Text("Date: \(stat.date, formatter: dateFormatter)")
+                                        .font(.headline)
+                                    Text("Number of Meals: \(stat.numberOfMeals)")
+                                    Text("Percentage of Meals Between 10am-7pm: \(stat.percentageOfMealsBetween10amAnd7pm, specifier: "%.2f")%")
+                                    Text("Longest Stretch Between Meals: \(stat.longestStretchBetweenMeals, specifier: "%.2f") hours")
+                                }
+                                .padding(.vertical, 8)
+                            }
                         }
-                        .padding(.vertical, 8)
+                        .frame(height: 400) // Limit the height of the list to ensure scrolling works
+                    }
+                    .padding()
+                }
+            }
+        }
+        .onChange(of: chartViewType) { _ in
+            updateChartData()
+        }
+    }
+    
+    private func chartView(title: String, valueType: ChartValueType) -> some View {
+        VStack {
+            Text("\(title) (\(chartViewType.rawValue.capitalized))")
+                .font(.headline)
+                .padding(.top)
+            Chart {
+                ForEach(chartData(), id: \.date) { stat in
+                    BarMark(
+                        x: .value("Date", stat.date),
+                        y: .value(valueType.rawValue, valueType.value(from: stat))
+                    )
+                }
+            }
+            .chartXAxis {
+                AxisMarks(values: xAxisValues()) { value in
+                    if let date = value.as(Date.self) {
+                        AxisValueLabel(xAxisDateFormatter().string(from: date))
                     }
                 }
-                .frame(height: 400) // Limit the height of the list to ensure scrolling works
             }
-            .padding()
+            .frame(height: 200)
+            .gesture(
+                TapGesture(count: 2)
+                    .onEnded {
+                        toggleChartViewType()
+                    }
+                    .simultaneously(with: LongPressGesture(minimumDuration: 0.5)
+                        .onEnded { _ in
+                            fullScreenTitle = title
+                            isFullScreen.toggle()
+                        }
+                    )
+            )
         }
+    }
+    
+    private var fullScreenChart: some View {
+        VStack {
+            Button(action: {
+                isFullScreen = false
+            }) {
+                Text("Close")
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+            Spacer()
+            Text("\(fullScreenTitle) (\(chartViewType.rawValue.capitalized))")
+                .font(.headline)
+                .padding(.top)
+            chartView(title: fullScreenTitle, valueType: .numberOfMeals)
+                .frame(maxHeight: .infinity)
+            Spacer()
+        }
+    }
+    
+    private func toggleChartViewType() {
+        switch chartViewType {
+        case .weekly:
+            chartViewType = .monthly
+        case .monthly:
+            chartViewType = .annual
+        case .annual:
+            chartViewType = .weekly
+        }
+    }
+    
+    private func chartData() -> [DailyStats] {
+        let stats = summaryStatsByDay()
+        switch chartViewType {
+        case .weekly:
+            return Array(stats.suffix(7))
+        case .monthly:
+            return Array(stats.suffix(30))
+        case .annual:
+            return stats
+        }
+    }
+    
+    private func updateChartData() {
+        // Perform any data updates needed when the chart view type changes
     }
     
     private func summaryStatsByDay() -> [DailyStats] {
@@ -148,10 +191,61 @@ struct SummaryStatsView: View {
         return dailyStats
     }
     
+    private func xAxisValues() -> [Date] {
+        let calendar = Calendar.current
+        let stats = summaryStatsByDay()
+        
+        switch chartViewType {
+        case .weekly:
+            return Array(stats.suffix(7)).map { $0.date }
+        case .monthly:
+            return Array(stats.suffix(30)).map { $0.date }
+        case .annual:
+            return stats.filter { stat in
+                let month = calendar.component(.month, from: stat.date)
+                return month % 3 == 0
+            }.map { $0.date }
+        }
+    }
+    
+    private func xAxisDateFormatter() -> DateFormatter {
+        let formatter = DateFormatter()
+        switch chartViewType {
+        case .weekly:
+            formatter.dateFormat = "E"
+        case .monthly:
+            formatter.dateFormat = "M/dd"
+        case .annual:
+            formatter.dateFormat = "MMM"
+        }
+        return formatter
+    }
+    
     private var dateFormatter: DateFormatter {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         return formatter
+    }
+}
+
+enum ChartViewType: String {
+    case weekly, monthly, annual
+}
+
+enum ChartValueType: String {
+    case numberOfMeals = "Number of Meals"
+    case percentageOfMealsBetween10amAnd7pm = "Percentage"
+    case longestStretchBetweenMeals = "Hours"
+    
+    func value(from stat: DailyStats) -> Double {
+        switch self {
+        case .numberOfMeals:
+            return Double(stat.numberOfMeals)
+        case .percentageOfMealsBetween10amAnd7pm:
+            return stat.percentageOfMealsBetween10amAnd7pm
+        case .longestStretchBetweenMeals:
+            return stat.longestStretchBetweenMeals
+        }
     }
 }
 
