@@ -5,6 +5,7 @@ struct ContentView: View {
     @State private var feedingTimes: [Date] = []
     @State private var showingFeedingsList = false
     @State private var showingSettings = false
+    @State private var showingSummaryStats = false
 
     var body: some View {
         VStack {
@@ -35,6 +36,20 @@ struct ContentView: View {
             .padding([.leading, .trailing, .bottom])
             .sheet(isPresented: $showingFeedingsList) {
                 FeedingsListView(feedingTimes: $feedingTimes)
+            }
+            
+            Button(action: {
+                showingSummaryStats.toggle()
+            }) {
+                Text("Show Summary Stats")
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+            .padding()
+            .sheet(isPresented: $showingSummaryStats) {
+                SummaryStatsView(feedingTimes: $feedingTimes)
             }
         }
         .sheet(isPresented: $showingSettings) {
