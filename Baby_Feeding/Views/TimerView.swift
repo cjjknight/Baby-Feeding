@@ -54,7 +54,9 @@ struct TimerView: View {
         }
         .sheet(isPresented: $showingMessageComposer) {
             let phoneNumbers = dataModel.selectedContacts.compactMap { $0.phoneNumbers.first?.value.stringValue }
-            MessageComposeView(recipients: phoneNumbers, body: "Feeding in Progress", isPresented: $showingMessageComposer)
+            if !phoneNumbers.isEmpty {
+                MessageComposeView(recipients: phoneNumbers, body: "Feeding in Progress", isPresented: $showingMessageComposer)
+            }
         }
     }
 
@@ -142,7 +144,10 @@ struct TimerView: View {
     }
 
     private func sendMessage() {
-        showingMessageComposer = true
+        let phoneNumbers = dataModel.selectedContacts.compactMap { $0.phoneNumbers.first?.value.stringValue }
+        if !phoneNumbers.isEmpty {
+            showingMessageComposer = true
+        }
     }
 }
 
