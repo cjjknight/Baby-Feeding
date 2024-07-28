@@ -52,7 +52,7 @@ struct TimerView: View {
             }
         }
         .sheet(isPresented: $showingMessageComposer) {
-            MessageComposeView(recipients: ["419-309-5113"], body: "Feeding in Progress", isPresented: $showingMessageComposer)
+            MessageComposeView(recipients: UserDefaults.standard.stringArray(forKey: "phoneNumbers") ?? [], body: "Feeding in Progress", isPresented: $showingMessageComposer)
         }
     }
 
