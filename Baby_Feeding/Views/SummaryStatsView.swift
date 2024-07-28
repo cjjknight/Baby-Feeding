@@ -16,7 +16,7 @@ struct SummaryStatsView: View {
                     .font(.headline)
                     .padding(.top)
                 Chart {
-                    ForEach(summaryStatsByDay().prefix(7), id: \.date) { stat in
+                    ForEach(summaryStatsByDay().suffix(7), id: \.date) { stat in
                         BarMark(
                             x: .value("Date", stat.date, unit: .day),
                             y: .value("Number of Meals", stat.numberOfMeals)
@@ -35,7 +35,7 @@ struct SummaryStatsView: View {
                     .font(.headline)
                     .padding(.top)
                 Chart {
-                    ForEach(summaryStatsByDay().prefix(7), id: \.date) { stat in
+                    ForEach(summaryStatsByDay().suffix(7), id: \.date) { stat in
                         BarMark(
                             x: .value("Date", stat.date, unit: .day),
                             y: .value("Percentage", stat.percentageOfMealsBetween10amAnd7pm)
@@ -59,7 +59,7 @@ struct SummaryStatsView: View {
                     .font(.headline)
                     .padding(.top)
                 Chart {
-                    ForEach(summaryStatsByDay().prefix(7), id: \.date) { stat in
+                    ForEach(summaryStatsByDay().suffix(7), id: \.date) { stat in
                         BarMark(
                             x: .value("Date", stat.date, unit: .day),
                             y: .value("Hours", stat.longestStretchBetweenMeals)
@@ -74,7 +74,7 @@ struct SummaryStatsView: View {
                 .frame(height: 200)
 
                 List {
-                    ForEach(summaryStatsByDay(), id: \.date) { stat in
+                    ForEach(summaryStatsByDay().reversed(), id: \.date) { stat in
                         VStack(alignment: .leading) {
                             Text("Date: \(stat.date, formatter: dateFormatter)")
                                 .font(.headline)
@@ -94,17 +94,25 @@ struct SummaryStatsView: View {
     private func summaryStatsByDay() -> [DailyStats] {
         var dailyStats: [DailyStats] = []
         let calendar = Calendar.current
-        let today = calendar.startOfDay(for: Date())
         
-        // Create date components for the past 7 days
-        let past7Days = (0..<7).map { calendar.date(byAdding: .day, value: -$0, to: today)! }
+        guard let earliestFeeding = feedingTimes.min() else {
+            return dailyStats // Return empty list if no feedings
+        }
+        
+        let startDay = calendar.startOfDay(for: earliestFeeding)
+        let endDay = calendar.startOfDay(for: Date())
+        
+        let daysRange = calendar.dateComponents([.day], from: startDay, to: endDay).day! + 1
+        
+        // Create date components for each day in the range
+        let allDays = (0..<daysRange).map { calendar.date(byAdding: .day, value: $0, to: startDay)! }
         
         // Group feedings by day
         let groupedByDay = Dictionary(grouping: feedingTimes) { (date) -> Date in
             return calendar.startOfDay(for: date)
         }
         
-        for day in past7Days {
+        for day in allDays {
             let feedings = groupedByDay[day, default: []]
             let sortedFeedings = feedings.sorted()
             let numberOfMeals = sortedFeedings.count
