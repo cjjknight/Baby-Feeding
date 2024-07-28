@@ -1,10 +1,10 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var dataModel = SharedDataModel()
     @State private var feedingTimes: [Date] = []
     @State private var showingFeedingsList = false
     @State private var showingSettings = false
-    @AppStorage("feedingInterval") private var feedingInterval: Int = 3 // Default to 3 hours
 
     var body: some View {
         VStack {
@@ -25,7 +25,7 @@ struct ContentView: View {
                 .frame(width: 150, height: 150)
                 .padding(.bottom, 40)
 
-            TimerView(feedingTimes: $feedingTimes, feedingInterval: feedingInterval) // Pass the wrapped value
+            TimerView(dataModel: dataModel, feedingTimes: $feedingTimes)
             Spacer()
 
             TimelineView(feedingTimes: $feedingTimes) {
@@ -38,7 +38,7 @@ struct ContentView: View {
             }
         }
         .sheet(isPresented: $showingSettings) {
-            SettingsView(feedingInterval: $feedingInterval) // Pass the binding for settings
+            SettingsView(dataModel: dataModel)
         }
     }
 }

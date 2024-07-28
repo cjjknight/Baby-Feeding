@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		8B847F592C55E3660058A032 /* ContactPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B847F582C55E3660058A032 /* ContactPickerView.swift */; };
 		8B847F5B2C55E58A0058A032 /* ContactSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B847F5A2C55E58A0058A032 /* ContactSearchView.swift */; };
+		8B847F5D2C55E6C30058A032 /* SharedDataModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B847F5C2C55E6C30058A032 /* SharedDataModel.swift */; };
 		8B89CB4A2C3A30C300E29E46 /* Baby_FeedingApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B89CB492C3A30C300E29E46 /* Baby_FeedingApp.swift */; };
 		8B89CB4C2C3A30C300E29E46 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B89CB4B2C3A30C300E29E46 /* ContentView.swift */; };
 		8B89CB4E2C3A30C300E29E46 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B89CB4D2C3A30C300E29E46 /* Item.swift */; };
@@ -45,6 +46,7 @@
 /* Begin PBXFileReference section */
 		8B847F582C55E3660058A032 /* ContactPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactPickerView.swift; sourceTree = "<group>"; };
 		8B847F5A2C55E58A0058A032 /* ContactSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactSearchView.swift; sourceTree = "<group>"; };
+		8B847F5C2C55E6C30058A032 /* SharedDataModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedDataModel.swift; sourceTree = "<group>"; };
 		8B89CB462C3A30C300E29E46 /* Baby_Feeding.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Baby_Feeding.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8B89CB492C3A30C300E29E46 /* Baby_FeedingApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Baby_FeedingApp.swift; sourceTree = "<group>"; };
 		8B89CB4B2C3A30C300E29E46 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -131,6 +133,7 @@
 				8B89CB492C3A30C300E29E46 /* Baby_FeedingApp.swift */,
 				8B847F572C557B430058A032 /* Views */,
 				8B89CB7E2C3A31A000E29E46 /* Utility.swift */,
+				8B847F5C2C55E6C30058A032 /* SharedDataModel.swift */,
 				8B89CB4D2C3A30C300E29E46 /* Item.swift */,
 				8B89CB4F2C3A30C400E29E46 /* Assets.xcassets */,
 				8B89CB512C3A30C400E29E46 /* Baby_Feeding.entitlements */,
@@ -296,6 +299,7 @@
 			files = (
 				8B89CB4C2C3A30C300E29E46 /* ContentView.swift in Sources */,
 				8B847F5B2C55E58A0058A032 /* ContactSearchView.swift in Sources */,
+				8B847F5D2C55E6C30058A032 /* SharedDataModel.swift in Sources */,
 				8B89CB4E2C3A30C300E29E46 /* Item.swift in Sources */,
 				8B89CB7D2C3A316F00E29E46 /* EditFeedingView.swift in Sources */,
 				8B92B7492C3E0379007B2659 /* SettingsView.swift in Sources */,

@@ -5,14 +5,13 @@ import MessageUI
 import Contacts
 
 struct TimerView: View {
+    @ObservedObject var dataModel: SharedDataModel
     @Binding var feedingTimes: [Date]
-    var feedingInterval: Int
     @State private var elapsedTime: String = "00:00:00"
     @State private var timerSubscription: AnyCancellable?
     @State private var buttonColor: Color = .green
     @State private var showingAlert = false
     @State private var showingMessageComposer = false
-    @State private var selectedContacts: [CNContact] = []
 
     var body: some View {
         VStack {
@@ -47,7 +46,6 @@ struct TimerView: View {
                 updateElapsedTime()
                 startTimer()
                 scheduleNotification()
-                loadSelectedContacts()
             }
             .background(Color.white.ignoresSafeArea())
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("UpdateElapsedTime"))) { _ in
@@ -55,7 +53,7 @@ struct TimerView: View {
             }
         }
         .sheet(isPresented: $showingMessageComposer) {
-            let phoneNumbers = selectedContacts.compactMap { $0.phoneNumbers.first?.value.stringValue }
+            let phoneNumbers = dataModel.selectedContacts.compactMap { $0.phoneNumbers.first?.value.stringValue }
             MessageComposeView(recipients: phoneNumbers, body: "Feeding in Progress", isPresented: $showingMessageComposer)
         }
     }
@@ -80,10 +78,10 @@ struct TimerView: View {
 
         let content = UNMutableNotificationContent()
         content.title = "Time to Feed"
-        content.body = "It's been \(feedingInterval) hours since the last feeding."
+        content.body = "It's been \(dataModel.feedingInterval) hours since the last feeding."
         content.sound = UNNotificationSound.default
 
-        let nextFeedingTime = Calendar.current.date(byAdding: .hour, value: feedingInterval, to: lastFeedTime)!
+        let nextFeedingTime = Calendar.current.date(byAdding: .hour, value: dataModel.feedingInterval, to: lastFeedTime)!
 
         let timeInterval = nextFeedingTime.timeIntervalSinceNow
         guard timeInterval > 0 else { return } // Ensure the time interval is greater than zero
@@ -119,9 +117,9 @@ struct TimerView: View {
         elapsedTime = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
         
         // Update button color based on elapsed time
-        if hours >= feedingInterval {
+        if hours >= dataModel.feedingInterval {
             buttonColor = .red
-        } else if hours >= feedingInterval - 1 {
+        } else if hours >= dataModel.feedingInterval - 1 {
             let percentage = Double(minutes) / 60.0
             buttonColor = Color(red: 1.0, green: 1.0 - percentage, blue: 0.0)
         } else {
@@ -136,7 +134,7 @@ struct TimerView: View {
             updateElapsedTime()
             if let lastFeedTime = lastFeedTime {
                 let interval = Date().timeIntervalSince(lastFeedTime)
-                if Int(interval) >= feedingInterval * 3600 {
+                if Int(interval) >= dataModel.feedingInterval * 3600 {
                     scheduleNotification()
                 }
             }
@@ -145,16 +143,6 @@ struct TimerView: View {
 
     private func sendMessage() {
         showingMessageComposer = true
-    }
-
-    private func loadSelectedContacts() {
-        if let data = UserDefaults.standard.data(forKey: "selectedContacts"),
-           let contacts = try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? [CNContact] {
-            selectedContacts = contacts
-            print("Loaded contacts: \(selectedContacts.count)")
-        } else {
-            print("No contacts to load")
-        }
     }
 }
 
