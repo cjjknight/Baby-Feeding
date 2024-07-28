@@ -5,87 +5,90 @@ struct SummaryStatsView: View {
     @Binding var feedingTimes: [Date]
     
     var body: some View {
-        VStack {
-            Text("Summary Stats")
-                .font(.largeTitle)
-                .padding()
+        ScrollView {
+            VStack {
+                Text("Summary Stats")
+                    .font(.largeTitle)
+                    .padding()
 
-            // Number of Meals Graph
-            Text("Number of Meals (Past 7 Days)")
-                .font(.headline)
-                .padding(.top)
-            Chart {
-                ForEach(summaryStatsByDay().prefix(7), id: \.date) { stat in
-                    BarMark(
-                        x: .value("Date", stat.date, unit: .day),
-                        y: .value("Number of Meals", stat.numberOfMeals)
-                    )
-                }
-            }
-            .chartXAxis {
-                AxisMarks(values: .stride(by: .day, count: 1)) { value in
-                    AxisValueLabel(format: .dateTime.weekday())
-                }
-            }
-            .frame(height: 200)
-
-            // Percentage of Meals Between 10am and 7pm Graph
-            Text("Percentage of Meals Between 10am-7pm (Past 7 Days)")
-                .font(.headline)
-                .padding(.top)
-            Chart {
-                ForEach(summaryStatsByDay().prefix(7), id: \.date) { stat in
-                    BarMark(
-                        x: .value("Date", stat.date, unit: .day),
-                        y: .value("Percentage", stat.percentageOfMealsBetween10amAnd7pm)
-                    )
-                }
-            }
-            .chartYAxis {
-                AxisMarks(values: .stride(by: 10)) { value in
-                    AxisValueLabel("\(value.as(Int.self) ?? 0)%")
-                }
-            }
-            .chartXAxis {
-                AxisMarks(values: .stride(by: .day, count: 1)) { value in
-                    AxisValueLabel(format: .dateTime.weekday())
-                }
-            }
-            .frame(height: 200)
-
-            // Longest Stretch Between Meals Graph
-            Text("Longest Stretch Between Meals (Past 7 Days)")
-                .font(.headline)
-                .padding(.top)
-            Chart {
-                ForEach(summaryStatsByDay().prefix(7), id: \.date) { stat in
-                    BarMark(
-                        x: .value("Date", stat.date, unit: .day),
-                        y: .value("Hours", stat.longestStretchBetweenMeals)
-                    )
-                }
-            }
-            .chartXAxis {
-                AxisMarks(values: .stride(by: .day, count: 1)) { value in
-                    AxisValueLabel(format: .dateTime.weekday())
-                }
-            }
-            .frame(height: 200)
-
-            List {
-                ForEach(summaryStatsByDay(), id: \.date) { stat in
-                    VStack(alignment: .leading) {
-                        Text("Date: \(stat.date, formatter: dateFormatter)")
-                            .font(.headline)
-                        Text("Number of Meals: \(stat.numberOfMeals)")
-                        Text("Percentage of Meals Between 10am-7pm: \(stat.percentageOfMealsBetween10amAnd7pm, specifier: "%.2f")%")
-                        Text("Longest Stretch Between Meals: \(stat.longestStretchBetweenMeals, specifier: "%.2f") hours")
+                // Number of Meals Graph
+                Text("Number of Meals (Past 7 Days)")
+                    .font(.headline)
+                    .padding(.top)
+                Chart {
+                    ForEach(summaryStatsByDay().prefix(7), id: \.date) { stat in
+                        BarMark(
+                            x: .value("Date", stat.date, unit: .day),
+                            y: .value("Number of Meals", stat.numberOfMeals)
+                        )
                     }
-                    .padding(.vertical, 8)
                 }
+                .chartXAxis {
+                    AxisMarks(values: .stride(by: .day, count: 1)) { value in
+                        AxisValueLabel(format: .dateTime.weekday())
+                    }
+                }
+                .frame(height: 200)
+
+                // Percentage of Meals Between 10am and 7pm Graph
+                Text("Percentage of Meals Between 10am-7pm (Past 7 Days)")
+                    .font(.headline)
+                    .padding(.top)
+                Chart {
+                    ForEach(summaryStatsByDay().prefix(7), id: \.date) { stat in
+                        BarMark(
+                            x: .value("Date", stat.date, unit: .day),
+                            y: .value("Percentage", stat.percentageOfMealsBetween10amAnd7pm)
+                        )
+                    }
+                }
+                .chartYAxis {
+                    AxisMarks(values: .stride(by: 10)) { value in
+                        AxisValueLabel("\(value.as(Int.self) ?? 0)%")
+                    }
+                }
+                .chartXAxis {
+                    AxisMarks(values: .stride(by: .day, count: 1)) { value in
+                        AxisValueLabel(format: .dateTime.weekday())
+                    }
+                }
+                .frame(height: 200)
+
+                // Longest Stretch Between Meals Graph
+                Text("Longest Stretch Between Meals (Past 7 Days)")
+                    .font(.headline)
+                    .padding(.top)
+                Chart {
+                    ForEach(summaryStatsByDay().prefix(7), id: \.date) { stat in
+                        BarMark(
+                            x: .value("Date", stat.date, unit: .day),
+                            y: .value("Hours", stat.longestStretchBetweenMeals)
+                        )
+                    }
+                }
+                .chartXAxis {
+                    AxisMarks(values: .stride(by: .day, count: 1)) { value in
+                        AxisValueLabel(format: .dateTime.weekday())
+                    }
+                }
+                .frame(height: 200)
+
+                List {
+                    ForEach(summaryStatsByDay(), id: \.date) { stat in
+                        VStack(alignment: .leading) {
+                            Text("Date: \(stat.date, formatter: dateFormatter)")
+                                .font(.headline)
+                            Text("Number of Meals: \(stat.numberOfMeals)")
+                            Text("Percentage of Meals Between 10am-7pm: \(stat.percentageOfMealsBetween10amAnd7pm, specifier: "%.2f")%")
+                            Text("Longest Stretch Between Meals: \(stat.longestStretchBetweenMeals, specifier: "%.2f") hours")
+                        }
+                        .padding(.vertical, 8)
+                    }
+                }
+                .frame(height: 400) // Limit the height of the list to ensure scrolling works
             }
+            .padding()
         }
-        .padding()
     }
     
     private func summaryStatsByDay() -> [DailyStats] {
