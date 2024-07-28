@@ -10,6 +10,13 @@ struct ContentView: View {
     var body: some View {
         VStack {
             HStack {
+                Button(action: {
+                    showingSummaryStats.toggle()
+                }) {
+                    Image(systemName: "chart.bar")
+                        .font(.title)
+                        .padding()
+                }
                 Spacer()
                 Button(action: {
                     showingSettings.toggle()
@@ -37,20 +44,9 @@ struct ContentView: View {
             .sheet(isPresented: $showingFeedingsList) {
                 FeedingsListView(feedingTimes: $feedingTimes)
             }
-            
-            Button(action: {
-                showingSummaryStats.toggle()
-            }) {
-                Text("Show Summary Stats")
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
-            }
-            .padding()
-            .sheet(isPresented: $showingSummaryStats) {
-                SummaryStatsView(feedingTimes: $feedingTimes)
-            }
+        }
+        .sheet(isPresented: $showingSummaryStats) {
+            SummaryStatsView(feedingTimes: $feedingTimes)
         }
         .sheet(isPresented: $showingSettings) {
             SettingsView(dataModel: dataModel)

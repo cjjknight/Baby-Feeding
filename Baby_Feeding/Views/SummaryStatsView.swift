@@ -15,8 +15,8 @@ struct SummaryStatsView: View {
                         Text("Date: \(stat.date, formatter: dateFormatter)")
                             .font(.headline)
                         Text("Number of Meals: \(stat.numberOfMeals)")
-                        Text("Percentage of Meals Between 10am-7pm: \(stat.percentageOfMealsBetween10amAnd7pm)%")
-                        Text("Longest Stretch Between Meals: \(stat.longestStretchBetweenMeals) hours")
+                        Text("Percentage of Meals Between 10am-7pm: \(stat.percentageOfMealsBetween10amAnd7pm, specifier: "%.2f")%")
+                        Text("Longest Stretch Between Meals: \(stat.longestStretchBetweenMeals, specifier: "%.2f") hours")
                     }
                     .padding(.vertical, 8)
                 }
