@@ -1,9 +1,10 @@
 import SwiftUI
+import Contacts
 
 struct SettingsView: View {
     @Binding var feedingInterval: Int
-    @State private var phoneNumbers: [String] = UserDefaults.standard.stringArray(forKey: "phoneNumbers") ?? []
-    @State private var newPhoneNumber = ""
+    @State private var selectedContacts: [CNContact] = []
+    @State private var isShowingContactSearch = false
 
     var body: some View {
         NavigationView {
@@ -17,47 +18,52 @@ struct SettingsView: View {
                     .pickerStyle(WheelPickerStyle())
                 }
 
-                Section(header: Text("Phone Numbers")) {
-                    ForEach(phoneNumbers, id: \.self) { phoneNumber in
-                        HStack {
-                            Text(phoneNumber)
-                            Spacer()
-                            Button(action: {
-                                if let index = phoneNumbers.firstIndex(of: phoneNumber) {
-                                    phoneNumbers.remove(at: index)
-                                    savePhoneNumbers()
-                                }
-                            }) {
-                                Image(systemName: "minus.circle")
-                                    .foregroundColor(.red)
-                            }
-                        }
+                Section(header: Text("Selected Contacts")) {
+                    ForEach(selectedContacts, id: \.identifier) { contact in
+                        Text("\(contact.givenName) \(contact.familyName)")
                     }
 
-                    HStack {
-                        TextField("New Phone Number", text: $newPhoneNumber)
-                            .keyboardType(.phonePad)
-                        Button(action: {
-                            if !newPhoneNumber.isEmpty && !phoneNumbers.contains(newPhoneNumber) {
-                                phoneNumbers.append(newPhoneNumber)
-                                savePhoneNumbers()
-                                newPhoneNumber = ""
-                            }
-                        }) {
+                    Button(action: {
+                        isShowingContactSearch = true
+                    }) {
+                        HStack {
                             Image(systemName: "plus.circle")
-                                .foregroundColor(.blue)
+                            Text("Add Contact")
                         }
                     }
                 }
             }
             .navigationTitle("Settings")
             .navigationBarItems(trailing: Button("Done") {
+                saveSelectedContacts()
                 UIApplication.shared.windows.first?.rootViewController?.dismiss(animated: true, completion: nil)
             })
         }
+        .onAppear {
+            loadSelectedContacts()
+        }
+        .sheet(isPresented: $isShowingContactSearch) {
+            ContactSearchView(selectedContacts: $selectedContacts, isPresented: $isShowingContactSearch)
+        }
     }
 
-    private func savePhoneNumbers() {
-        UserDefaults.standard.set(phoneNumbers, forKey: "phoneNumbers")
+    private func saveSelectedContacts() {
+        do {
+            let data = try NSKeyedArchiver.archivedData(withRootObject: selectedContacts, requiringSecureCoding: false)
+            UserDefaults.standard.set(data, forKey: "selectedContacts")
+            print("Saved contacts: \(selectedContacts.count)")
+        } catch {
+            print("Failed to save contacts: \(error)")
+        }
+    }
+
+    private func loadSelectedContacts() {
+        if let data = UserDefaults.standard.data(forKey: "selectedContacts"),
+           let contacts = try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? [CNContact] {
+            selectedContacts = contacts
+            print("Loaded contacts: \(selectedContacts.count)")
+        } else {
+            print("No contacts to load")
+        }
     }
 }

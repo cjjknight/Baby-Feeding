@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8B847F592C55E3660058A032 /* ContactPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B847F582C55E3660058A032 /* ContactPickerView.swift */; };
+		8B847F5B2C55E58A0058A032 /* ContactSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B847F5A2C55E58A0058A032 /* ContactSearchView.swift */; };
 		8B89CB4A2C3A30C300E29E46 /* Baby_FeedingApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B89CB492C3A30C300E29E46 /* Baby_FeedingApp.swift */; };
 		8B89CB4C2C3A30C300E29E46 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B89CB4B2C3A30C300E29E46 /* ContentView.swift */; };
 		8B89CB4E2C3A30C300E29E46 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B89CB4D2C3A30C300E29E46 /* Item.swift */; };
@@ -41,6 +43,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		8B847F582C55E3660058A032 /* ContactPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactPickerView.swift; sourceTree = "<group>"; };
+		8B847F5A2C55E58A0058A032 /* ContactSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactSearchView.swift; sourceTree = "<group>"; };
 		8B89CB462C3A30C300E29E46 /* Baby_Feeding.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Baby_Feeding.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8B89CB492C3A30C300E29E46 /* Baby_FeedingApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Baby_FeedingApp.swift; sourceTree = "<group>"; };
 		8B89CB4B2C3A30C300E29E46 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -92,6 +96,8 @@
 				8B89CB4B2C3A30C300E29E46 /* ContentView.swift */,
 				8B89CB762C3A314100E29E46 /* TimerView.swift */,
 				8B89CB782C3A315800E29E46 /* TimelineView.swift */,
+				8B847F582C55E3660058A032 /* ContactPickerView.swift */,
+				8B847F5A2C55E58A0058A032 /* ContactSearchView.swift */,
 				8B92B7482C3E0379007B2659 /* SettingsView.swift */,
 				8B89CB7C2C3A316F00E29E46 /* EditFeedingView.swift */,
 				8B89CB7A2C3A316200E29E46 /* FeedingsListView.swift */,
@@ -289,10 +295,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				8B89CB4C2C3A30C300E29E46 /* ContentView.swift in Sources */,
+				8B847F5B2C55E58A0058A032 /* ContactSearchView.swift in Sources */,
 				8B89CB4E2C3A30C300E29E46 /* Item.swift in Sources */,
 				8B89CB7D2C3A316F00E29E46 /* EditFeedingView.swift in Sources */,
 				8B92B7492C3E0379007B2659 /* SettingsView.swift in Sources */,
 				8B89CB772C3A314100E29E46 /* TimerView.swift in Sources */,
+				8B847F592C55E3660058A032 /* ContactPickerView.swift in Sources */,
 				8B89CB7F2C3A31A000E29E46 /* Utility.swift in Sources */,
 				8B89CB7B2C3A316200E29E46 /* FeedingsListView.swift in Sources */,
 				8B89CB792C3A315800E29E46 /* TimelineView.swift in Sources */,
@@ -460,6 +468,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSContactsUsageDescription = "We need access to your contacts to send feeding notifications";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
@@ -498,6 +507,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSContactsUsageDescription = "We need access to your contacts to send feeding notifications";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;

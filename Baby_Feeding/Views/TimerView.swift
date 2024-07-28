@@ -2,6 +2,7 @@ import SwiftUI
 import Combine
 import UserNotifications
 import MessageUI
+import Contacts
 
 struct TimerView: View {
     @Binding var feedingTimes: [Date]
@@ -11,6 +12,7 @@ struct TimerView: View {
     @State private var buttonColor: Color = .green
     @State private var showingAlert = false
     @State private var showingMessageComposer = false
+    @State private var selectedContacts: [CNContact] = []
 
     var body: some View {
         VStack {
@@ -45,6 +47,7 @@ struct TimerView: View {
                 updateElapsedTime()
                 startTimer()
                 scheduleNotification()
+                loadSelectedContacts()
             }
             .background(Color.white.ignoresSafeArea())
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("UpdateElapsedTime"))) { _ in
@@ -52,7 +55,8 @@ struct TimerView: View {
             }
         }
         .sheet(isPresented: $showingMessageComposer) {
-            MessageComposeView(recipients: UserDefaults.standard.stringArray(forKey: "phoneNumbers") ?? [], body: "Feeding in Progress", isPresented: $showingMessageComposer)
+            let phoneNumbers = selectedContacts.compactMap { $0.phoneNumbers.first?.value.stringValue }
+            MessageComposeView(recipients: phoneNumbers, body: "Feeding in Progress", isPresented: $showingMessageComposer)
         }
     }
 
@@ -111,7 +115,7 @@ struct TimerView: View {
         let interval = Date().timeIntervalSince(lastFeedTime)
         let hours = Int(interval) / 3600
         let minutes = (Int(interval) % 3600) / 60
-        let seconds = Int(interval) % 60
+        let seconds = (Int(interval) % 60)
         elapsedTime = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
         
         // Update button color based on elapsed time
@@ -141,6 +145,16 @@ struct TimerView: View {
 
     private func sendMessage() {
         showingMessageComposer = true
+    }
+
+    private func loadSelectedContacts() {
+        if let data = UserDefaults.standard.data(forKey: "selectedContacts"),
+           let contacts = try? NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(data) as? [CNContact] {
+            selectedContacts = contacts
+            print("Loaded contacts: \(selectedContacts.count)")
+        } else {
+            print("No contacts to load")
+        }
     }
 }
 
