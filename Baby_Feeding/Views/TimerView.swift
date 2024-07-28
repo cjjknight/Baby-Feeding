@@ -1,6 +1,7 @@
 import SwiftUI
 import Combine
 import UserNotifications
+import MessageUI
 
 struct TimerView: View {
     @Binding var feedingTimes: [Date]
@@ -9,6 +10,7 @@ struct TimerView: View {
     @State private var timerSubscription: AnyCancellable?
     @State private var buttonColor: Color = .green
     @State private var showingAlert = false
+    @State private var showingMessageComposer = false
 
     var body: some View {
         VStack {
@@ -22,6 +24,7 @@ struct TimerView: View {
                     updateElapsedTime()
                     startTimer()
                     scheduleNotification()
+                    sendMessage()
                 }
             }) {
                 Text(elapsedTime)
@@ -47,6 +50,9 @@ struct TimerView: View {
             .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("UpdateElapsedTime"))) { _ in
                 updateElapsedTime()
             }
+        }
+        .sheet(isPresented: $showingMessageComposer) {
+            MessageComposeView(recipients: ["419-309-5113"], body: "Feeding in Progress", isPresented: $showingMessageComposer)
         }
     }
 
@@ -130,6 +136,43 @@ struct TimerView: View {
                     scheduleNotification()
                 }
             }
+        }
+    }
+
+    private func sendMessage() {
+        showingMessageComposer = true
+    }
+}
+
+struct MessageComposeView: UIViewControllerRepresentable {
+    var recipients: [String]
+    var body: String
+    @Binding var isPresented: Bool
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    func makeUIViewController(context: Context) -> MFMessageComposeViewController {
+        let controller = MFMessageComposeViewController()
+        controller.recipients = recipients
+        controller.body = body
+        controller.messageComposeDelegate = context.coordinator
+        return controller
+    }
+
+    func updateUIViewController(_ uiViewController: MFMessageComposeViewController, context: Context) {}
+
+    class Coordinator: NSObject, MFMessageComposeViewControllerDelegate {
+        var parent: MessageComposeView
+
+        init(_ parent: MessageComposeView) {
+            self.parent = parent
+        }
+
+        func messageComposeViewController(_ controller: MFMessageComposeViewController, didFinishWith result: MessageComposeResult) {
+            parent.isPresented = false
+            controller.dismiss(animated: true, completion: nil)
         }
     }
 }
