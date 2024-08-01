@@ -55,7 +55,7 @@ struct TimerView: View {
         .sheet(isPresented: $showingMessageComposer) {
             let phoneNumbers = dataModel.selectedContacts.compactMap { $0.phoneNumbers.first?.value.stringValue }
             if !phoneNumbers.isEmpty {
-                MessageComposeView(recipients: phoneNumbers, body: "Feeding in Progress", isPresented: $showingMessageComposer)
+                MessageComposeView(recipients: phoneNumbers, body: "Troy is enjoying a meal in the most natural and healthy way possible. Troy hopes that the sight of him enjoying his meal makes you feel wonder at the awesome design of the human body rather than ashamed because centuries of puritan influences in the USA has stigmatized women's bodies", isPresented: $showingMessageComposer)
             }
         }
     }
