@@ -1,0 +1,11 @@
+# Xcode
+xcuserdata/
+*.xcuserstate
+DerivedData/
+build/
+.DS_Store
+
+# Cloudflare Worker backend (server/)
+server/node_modules/
+server/.wrangler/
+server/backup.sql
