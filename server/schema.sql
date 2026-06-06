@@ -15,3 +15,16 @@ CREATE TABLE IF NOT EXISTS feedings (
 
 CREATE INDEX IF NOT EXISTS idx_feedings_family ON feedings (family_id);
 CREATE INDEX IF NOT EXISTS idx_feedings_family_updated ON feedings (family_id, updated_at);
+
+-- Diaper changes (first few weeks): same sync model as feedings, plus a kind.
+CREATE TABLE IF NOT EXISTS diapers (
+  id          TEXT PRIMARY KEY,          -- client-generated UUID
+  family_id   TEXT NOT NULL,
+  occurred_at INTEGER NOT NULL,          -- epoch milliseconds of the change
+  kind        TEXT NOT NULL,             -- "pee" | "poop"
+  deleted     INTEGER NOT NULL DEFAULT 0,
+  updated_at  INTEGER NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_diapers_family ON diapers (family_id);
+CREATE INDEX IF NOT EXISTS idx_diapers_family_updated ON diapers (family_id, updated_at);

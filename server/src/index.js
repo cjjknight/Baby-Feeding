@@ -10,6 +10,9 @@
 //   GET  /api/feedings?family=<id>[&since=<epoch_ms>]   -> { feedings: [...] }
 //   POST /api/feedings   body: { family, id, fed_at, note?, deleted?, updated_at? }
 //        upsert one feeding (last-writer-wins). Returns { feeding }.
+//   GET  /api/diapers?family=<id>[&since=<epoch_ms>]    -> { diapers: [...] }
+//   POST /api/diapers    body: { family, id, occurred_at, kind, deleted?, updated_at? }
+//        upsert one diaper change (kind = "pee" | "poop"). Same sync model.
 //
 // `family` is a shared secret string baked into the app — it pairs the two
 // phones without any account system.
@@ -42,6 +45,16 @@ export default {
       try {
         if (request.method === 'GET') return await listFeedings(url, env);
         if (request.method === 'POST') return await upsertFeeding(request, env);
+      } catch (err) {
+        return json({ error: String(err && err.message || err) }, 500);
+      }
+      return json({ error: 'method not allowed' }, 405);
+    }
+
+    if (url.pathname === '/api/diapers') {
+      try {
+        if (request.method === 'GET') return await listDiapers(url, env);
+        if (request.method === 'POST') return await upsertDiaper(request, env);
       } catch (err) {
         return json({ error: String(err && err.message || err) }, 500);
       }
@@ -111,6 +124,73 @@ async function upsertFeeding(request, env) {
       id: row.id,
       fed_at: row.fed_at,
       note: row.note,
+      deleted: row.deleted === 1,
+      updated_at: row.updated_at,
+    },
+  });
+}
+
+// --- Diapers (same sync model as feedings; kind = "pee" | "poop") ---
+
+async function listDiapers(url, env) {
+  const family = url.searchParams.get('family');
+  if (!family) return json({ error: 'family is required' }, 400);
+
+  const since = Number(url.searchParams.get('since') || 0) || 0;
+
+  const { results } = await env.DB.prepare(
+    `SELECT id, occurred_at, kind, deleted, updated_at
+       FROM diapers
+      WHERE family_id = ? AND updated_at > ?
+      ORDER BY occurred_at DESC`
+  ).bind(family, since).all();
+
+  return json({
+    diapers: (results || []).map((r) => ({
+      id: r.id,
+      occurred_at: r.occurred_at,
+      kind: r.kind,
+      deleted: r.deleted === 1,
+      updated_at: r.updated_at,
+    })),
+  });
+}
+
+async function upsertDiaper(request, env) {
+  const body = await request.json().catch(() => null);
+  if (!body) return json({ error: 'invalid json' }, 400);
+
+  const { family, id, occurred_at, kind } = body;
+  if (!family || !id || typeof occurred_at !== 'number') {
+    return json({ error: 'family, id, and numeric occurred_at are required' }, 400);
+  }
+  if (kind !== 'pee' && kind !== 'poop') {
+    return json({ error: 'kind must be "pee" or "poop"' }, 400);
+  }
+
+  const deleted = body.deleted ? 1 : 0;
+  const updated_at = typeof body.updated_at === 'number' ? body.updated_at : Date.now();
+
+  await env.DB.prepare(
+    `INSERT INTO diapers (id, family_id, occurred_at, kind, deleted, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?)
+     ON CONFLICT(id) DO UPDATE SET
+          occurred_at = excluded.occurred_at,
+          kind        = excluded.kind,
+          deleted     = excluded.deleted,
+          updated_at  = excluded.updated_at
+        WHERE excluded.updated_at >= diapers.updated_at`
+  ).bind(id, family, occurred_at, kind, deleted, updated_at).run();
+
+  const row = await env.DB.prepare(
+    `SELECT id, occurred_at, kind, deleted, updated_at FROM diapers WHERE id = ?`
+  ).bind(id).first();
+
+  return json({
+    diaper: row && {
+      id: row.id,
+      occurred_at: row.occurred_at,
+      kind: row.kind,
       deleted: row.deleted === 1,
       updated_at: row.updated_at,
     },
