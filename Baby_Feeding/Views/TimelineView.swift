@@ -22,9 +22,8 @@ struct TimelineView: View {
                     // Draw feeding times with bottle images
                     ForEach(feedingTimes.filter { $0 >= startOfTimeline }, id: \.self) { feedingTime in
                         let position = CGFloat(feedingTime.timeIntervalSince(startOfTimeline)) / (24 * 3600) * timelineWidth
-                        Image("512")
-                            .resizable()
-                            .frame(width: 20, height: 20)
+                        Text("🤱")
+                            .font(.system(size: 18))
                             .position(x: position, y: timelineHeight / 2)
                     }
                 }

@@ -51,5 +51,6 @@ Forge workspace defaults (see `~/.claude/projects/-Users-christopherjohnson-Desk
 - When starting a slice, mark it `**[in progress]**`. When done, move it to `## Done` with date + commit.
 
 ## Done
+- 2026-06-06 — **Bottle → 🤱**: replaced the bottle imagery (main screen + timeline markers) with the breastfeeding emoji, per the wife's preference (they're breastfeeding, avoiding bottles). Done via SF text/emoji — no new image assets. Old `babyBottle`/`512` assets remain in the catalog, now unused. Native iOS kept (paid Apple Developer account; reminders matter). Verified in simulator.
 - 2026-06-06 — **Backup + consolidation**: pushed the unpushed final commit (`00d02ff`, was on a detached HEAD) to GitHub; moved the project from `_archive` into `Forge/BabyFeeding/` as an active project; added PLAN.md + CLAUDE.md.
 - 2026-06-06 — **Shared Family Log slice**: added the Cloudflare Worker + D1 sync backend; refactored all feeding data into `FeedingStore` with optimistic-local + background sync (LWW, tombstones, legacy migration); fixed the edit-sort bug (editing a feeding used to sort ascending and make the main timer count from the oldest feed); made the announce-feeding text opt-in (off by default) via a Settings toggle; persisted the feeding interval across launches. Verified: simulator build + live server pull/merge/display.

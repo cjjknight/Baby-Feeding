@@ -28,9 +28,8 @@ struct ContentView: View {
                 }
             }
             Spacer()
-            Image("babyBottle")
-                .resizable()
-                .scaledToFit()
+            Text("🤱")
+                .font(.system(size: 110))
                 .frame(width: 150, height: 150)
                 .padding(.bottom, 40)
 
