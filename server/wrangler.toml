@@ -1,0 +1,10 @@
+name = "baby-feeding-sync"
+main = "src/index.js"
+compatibility_date = "2025-07-18"
+
+# D1 database. After `npx wrangler d1 create baby-feeding`, paste the printed
+# database_id below (replace PASTE_DATABASE_ID_HERE).
+[[d1_databases]]
+binding = "DB"
+database_name = "baby-feeding"
+database_id = "fdccb32b-3bb5-4eff-ae31-011f2b2effb9"

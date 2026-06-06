@@ -1,0 +1,15 @@
+{
+  "name": "baby-feeding-sync",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:init:local": "wrangler d1 execute baby-feeding --local --file=schema.sql",
+    "db:init": "wrangler d1 execute baby-feeding --remote --file=schema.sql",
+    "db:backup": "wrangler d1 export baby-feeding --remote --output backup.sql"
+  },
+  "devDependencies": {
+    "wrangler": "^3.99.0"
+  }
+}
