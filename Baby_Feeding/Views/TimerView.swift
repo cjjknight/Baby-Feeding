@@ -5,8 +5,8 @@ import MessageUI
 import Contacts
 
 struct TimerView: View {
+    @ObservedObject var store: FeedingStore
     @ObservedObject var dataModel: SharedDataModel
-    @Binding var feedingTimes: [Date]
     @State private var elapsedTime: String = "00:00:00"
     @State private var timerSubscription: AnyCancellable?
     @State private var buttonColor: Color = .green
@@ -16,16 +16,16 @@ struct TimerView: View {
     var body: some View {
         VStack {
             Button(action: {
-                let now = Date()
-                if let lastFeeding = feedingTimes.first, now.timeIntervalSince(lastFeeding) < 300 {
+                if let lastFeeding = store.lastFeedingDate, Date().timeIntervalSince(lastFeeding) < 300 {
                     showingAlert = true
                 } else {
-                    feedingTimes.insert(now, at: 0) // Insert at the beginning
-                    saveFeedingTimes()
+                    store.logFeeding()
                     updateElapsedTime()
                     startTimer()
                     scheduleNotification()
-                    sendMessage()
+                    if dataModel.messagingEnabled {
+                        sendMessage()
+                    }
                 }
             }) {
                 Text(elapsedTime)
@@ -41,15 +41,16 @@ struct TimerView: View {
             }
             .onAppear {
                 requestNotificationPermission()
-                loadFeedingTimes()
-                feedingTimes.sort(by: >)
                 updateElapsedTime()
                 startTimer()
                 scheduleNotification()
             }
             .background(Color.white.ignoresSafeArea())
-            .onReceive(NotificationCenter.default.publisher(for: NSNotification.Name("UpdateElapsedTime"))) { _ in
+            .onChange(of: store.lastFeedingDate) { _, _ in
+                // A manual edit/delete or an incoming sync can change the most
+                // recent feeding — recompute the clock and the reminder.
                 updateElapsedTime()
+                scheduleNotification()
             }
         }
         .sheet(isPresented: $showingMessageComposer) {
@@ -61,7 +62,7 @@ struct TimerView: View {
     }
 
     private var lastFeedTime: Date? {
-        feedingTimes.first
+        store.lastFeedingDate
     }
 
     private func requestNotificationPermission() {
@@ -89,7 +90,7 @@ struct TimerView: View {
         guard timeInterval > 0 else { return } // Ensure the time interval is greater than zero
 
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: timeInterval, repeats: false)
-        
+
         let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
         UNUserNotificationCenter.current().add(request) { error in
             if let error = error {
@@ -98,26 +99,18 @@ struct TimerView: View {
         }
     }
 
-    private func saveFeedingTimes() {
-        let encodedData = try? JSONEncoder().encode(feedingTimes)
-        UserDefaults.standard.set(encodedData, forKey: "feedingTimes")
-    }
-
-    private func loadFeedingTimes() {
-        if let savedData = UserDefaults.standard.data(forKey: "feedingTimes"),
-           let decodedTimes = try? JSONDecoder().decode([Date].self, from: savedData) {
-            feedingTimes = decodedTimes
-        }
-    }
-
     private func updateElapsedTime() {
-        guard let lastFeedTime = lastFeedTime else { return }
+        guard let lastFeedTime = lastFeedTime else {
+            elapsedTime = "00:00:00"
+            buttonColor = .green
+            return
+        }
         let interval = Date().timeIntervalSince(lastFeedTime)
         let hours = Int(interval) / 3600
         let minutes = (Int(interval) % 3600) / 60
         let seconds = (Int(interval) % 60)
         elapsedTime = String(format: "%02d:%02d:%02d", hours, minutes, seconds)
-        
+
         // Update button color based on elapsed time
         if hours >= dataModel.feedingInterval {
             buttonColor = .red

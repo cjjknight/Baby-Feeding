@@ -2,11 +2,21 @@ import SwiftUI
 import Contacts
 
 class SharedDataModel: ObservableObject {
-    @Published var feedingInterval: Int
+    @Published var feedingInterval: Int {
+        didSet { UserDefaults.standard.set(feedingInterval, forKey: "feedingInterval") }
+    }
     @Published var selectedContacts: [CNContact] = []
+    /// When off (the default), logging a feeding never opens Messages. Opt-in
+    /// in Settings keeps the "announce the feeding" feature available without
+    /// interrupting every tap.
+    @Published var messagingEnabled: Bool {
+        didSet { UserDefaults.standard.set(messagingEnabled, forKey: "messagingEnabled") }
+    }
 
-    init(feedingInterval: Int = 4) {
-        self.feedingInterval = feedingInterval
+    init(feedingInterval defaultInterval: Int = 4) {
+        let savedInterval = UserDefaults.standard.object(forKey: "feedingInterval") as? Int
+        self.feedingInterval = savedInterval ?? defaultInterval
+        self.messagingEnabled = UserDefaults.standard.bool(forKey: "messagingEnabled") // defaults to false
         loadSelectedContacts()
     }
 

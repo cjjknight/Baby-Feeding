@@ -1,17 +1,18 @@
 import SwiftUI
 
 struct FeedingsListView: View {
-    @Binding var feedingTimes: [Date]
+    @ObservedObject var store: FeedingStore
     @State private var showingAddFeeding = false
     @State private var newFeedingDate = Date()
     @State private var showingEditFeeding = false
-    @State private var selectedFeedingTime: Date?
+    @State private var selectedFeeding: Feeding?
 
     var body: some View {
         NavigationView {
             List {
                 // Add new feeding button at the top
                 Button(action: {
+                    newFeedingDate = Date()
                     showingAddFeeding.toggle()
                 }) {
                     Text("Add New Feeding")
@@ -21,47 +22,37 @@ struct FeedingsListView: View {
                     VStack {
                         DatePicker("Feeding Time", selection: $newFeedingDate)
                         Button("Add") {
-                            feedingTimes.append(newFeedingDate)
-                            feedingTimes.sort(by: >)
-                            saveFeedingTimes()
-                            NotificationCenter.default.post(name: NSNotification.Name("UpdateElapsedTime"), object: nil)
+                            store.logFeeding(at: newFeedingDate)
                             showingAddFeeding = false
                         }
                     }
                     .padding()
                 }
 
-                // Display feeding times in reverse order
-                ForEach(feedingTimes.sorted(by: >), id: \.self) { feedingTime in
+                // Display feeding times, newest first (the store keeps the order)
+                ForEach(store.activeFeedings) { feeding in
                     Button(action: {
-                        selectedFeedingTime = feedingTime
+                        selectedFeeding = feeding
                         showingEditFeeding.toggle()
                     }) {
-                        Text("\(feedingTime, formatter: dateFormatter)")
+                        Text("\(feeding.date, formatter: dateFormatter)")
                     }
                 }
                 .onDelete(perform: deleteFeeding)
             }
             .navigationTitle("Feeding Times")
             .sheet(isPresented: $showingEditFeeding) {
-                if let selectedFeedingTime = selectedFeedingTime {
-                    EditFeedingView(feedingTimes: $feedingTimes, feedingTime: Binding(
-                        get: { selectedFeedingTime },
-                        set: { self.selectedFeedingTime = $0 }
-                    ))
+                if let selectedFeeding = selectedFeeding {
+                    EditFeedingView(store: store, feeding: selectedFeeding)
                 }
             }
         }
     }
 
     private func deleteFeeding(at offsets: IndexSet) {
-        feedingTimes.remove(atOffsets: offsets)
-        saveFeedingTimes()
-        NotificationCenter.default.post(name: NSNotification.Name("UpdateElapsedTime"), object: nil)
-    }
-
-    private func saveFeedingTimes() {
-        let encodedData = try? JSONEncoder().encode(feedingTimes)
-        UserDefaults.standard.set(encodedData, forKey: "feedingTimes")
+        let ids = offsets.map { store.activeFeedings[$0].id }
+        for id in ids {
+            store.deleteFeeding(id: id)
+        }
     }
 }

@@ -1,33 +1,31 @@
 import SwiftUI
 
 struct EditFeedingView: View {
-    @Binding var feedingTimes: [Date]
-    @Binding var feedingTime: Date
+    @ObservedObject var store: FeedingStore
+    let feedingID: String
+    @State private var date: Date
     @Environment(\.presentationMode) private var presentationMode
+
+    init(store: FeedingStore, feeding: Feeding) {
+        self.store = store
+        self.feedingID = feeding.id
+        _date = State(initialValue: feeding.date)
+    }
 
     var body: some View {
         VStack {
-            DatePicker("Edit Feeding Time", selection: $feedingTime)
+            DatePicker("Edit Feeding Time", selection: $date)
                 .padding()
 
             HStack {
                 Button("Save") {
-                    if let index = feedingTimes.firstIndex(where: { $0 == feedingTime }) {
-                        feedingTimes[index] = feedingTime
-                    }
-                    feedingTimes.sort()
-                    saveFeedingTimes()
-                    NotificationCenter.default.post(name: NSNotification.Name("UpdateElapsedTime"), object: nil)
+                    store.updateFeeding(id: feedingID, to: date)
                     presentationMode.wrappedValue.dismiss()
                 }
                 .padding()
 
                 Button("Delete") {
-                    if let index = feedingTimes.firstIndex(where: { $0 == feedingTime }) {
-                        feedingTimes.remove(at: index)
-                    }
-                    saveFeedingTimes()
-                    NotificationCenter.default.post(name: NSNotification.Name("UpdateElapsedTime"), object: nil)
+                    store.deleteFeeding(id: feedingID)
                     presentationMode.wrappedValue.dismiss()
                 }
                 .padding()
@@ -35,10 +33,5 @@ struct EditFeedingView: View {
             }
         }
         .padding()
-    }
-
-    private func saveFeedingTimes() {
-        let encodedData = try? JSONEncoder().encode(feedingTimes)
-        UserDefaults.standard.set(encodedData, forKey: "feedingTimes")
     }
 }

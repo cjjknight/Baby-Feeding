@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct TimelineView: View {
-    @Binding var feedingTimes: [Date]
+    let feedingTimes: [Date]
     var onTimelineTap: () -> Void
 
     var body: some View {

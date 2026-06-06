@@ -2,7 +2,7 @@ import SwiftUI
 import Charts
 
 struct SummaryStatsView: View {
-    @Binding var feedingTimes: [Date]
+    let feedingTimes: [Date]
     @State private var chartViewType: ChartViewType = .weekly
     @State private var isFullScreen: Bool = false
     @State private var fullScreenTitle: String = ""

@@ -1,8 +1,9 @@
 import SwiftUI
 
 struct ContentView: View {
+    @StateObject private var store = FeedingStore()
     @StateObject private var dataModel = SharedDataModel()
-    @State private var feedingTimes: [Date] = []
+    @Environment(\.scenePhase) private var scenePhase
     @State private var showingFeedingsList = false
     @State private var showingSettings = false
     @State private var showingSummaryStats = false
@@ -33,20 +34,24 @@ struct ContentView: View {
                 .frame(width: 150, height: 150)
                 .padding(.bottom, 40)
 
-            TimerView(dataModel: dataModel, feedingTimes: $feedingTimes)
+            TimerView(store: store, dataModel: dataModel)
             Spacer()
 
-            TimelineView(feedingTimes: $feedingTimes) {
+            TimelineView(feedingTimes: store.activeDates) {
                 showingFeedingsList.toggle()
             }
             .frame(height: 100)
             .padding([.leading, .trailing, .bottom])
             .sheet(isPresented: $showingFeedingsList) {
-                FeedingsListView(feedingTimes: $feedingTimes)
+                FeedingsListView(store: store)
             }
         }
+        .onAppear { store.syncNow() }
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active { store.syncNow() }
+        }
         .sheet(isPresented: $showingSummaryStats) {
-            SummaryStatsView(feedingTimes: $feedingTimes)
+            SummaryStatsView(feedingTimes: store.activeDates)
         }
         .sheet(isPresented: $showingSettings) {
             SettingsView(dataModel: dataModel)

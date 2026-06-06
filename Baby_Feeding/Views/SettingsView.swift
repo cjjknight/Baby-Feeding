@@ -17,6 +17,10 @@ struct SettingsView: View {
                     .pickerStyle(WheelPickerStyle())
                 }
 
+                Section(header: Text("Announce Feedings"), footer: Text("When on, logging a feeding opens a text message to the contacts below. Off by default.")) {
+                    Toggle("Text contacts on each feeding", isOn: $dataModel.messagingEnabled)
+                }
+
                 Section(header: Text("Selected Contacts")) {
                     List {
                         ForEach(dataModel.selectedContacts, id: \.identifier) { contact in
