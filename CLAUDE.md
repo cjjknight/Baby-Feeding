@@ -14,15 +14,18 @@ BabyFeeding/
 ├── Baby_Feeding.xcodeproj        # objectVersion 56 — NOT filesystem-synchronized
 ├── Baby_Feeding/
 │   ├── Baby_FeedingApp.swift      # @main
-│   ├── FeedingStore.swift         # ← data layer: model + store + sync + AppConfig
+│   ├── FeedingStore.swift         # ← data layer: Feeding+Diaper models, both
+│   │                              #   stores, both sync services, AppConfig
+│   ├── Baby_FeedingApp.swift      # @main — TabView root (Feeding | Diapers)
 │   ├── SharedDataModel.swift      # interval, contacts, messagingEnabled
 │   ├── Utility.swift              # shared dateFormatter
-│   └── Views/                     # ContentView, TimerView, FeedingsListView,
-│                                  #   EditFeedingView, TimelineView,
-│                                  #   SummaryStatsView, SettingsView, Contact*
+│   └── Views/                     # ContentView (+ DiaperView/List/Edit appended),
+│                                  #   TimerView, FeedingsListView, EditFeedingView,
+│                                  #   TimelineView, SummaryStatsView, SettingsView, Contact*
 └── server/                        # Cloudflare Worker + D1 sync backend
-    ├── src/index.js               # REST API
-    ├── schema.sql                 # feedings table
+    ├── src/index.js               # REST API (/api/feedings + /api/diapers)
+    ├── schema.sql                 # feedings + diapers tables
+    ├── peek.sh                    # print live log in local time / fix entries
     └── wrangler.toml              # live database_id wired in
 ```
 
@@ -37,8 +40,12 @@ The Xcode project is `objectVersion 56` (not Xcode-16 filesystem-synchronized), 
 - Sync is optimistic-local-then-background-push; pulls merge last-writer-wins by `updatedAt`; deletes are tombstones (never hard-delete client-side). Trigger a pull with `store.syncNow()` on appear and on `scenePhase == .active`.
 - The two phones are paired by a shared `AppConfig.familyID` baked into the app — there are no accounts. Changing that ID starts a fresh, separate log.
 
+### Diapers
+- Mirror the feeding pattern: `DiaperStore` + `DiaperSyncService` live in `FeedingStore.swift`; the screens (`DiaperView`/`DiaperListView`/`DiaperEditView`) are appended to `ContentView.swift`. Kept intentionally calm — no timer, notifications, or messaging. `kind` is `pee`/`poop`; a both-diaper is two entries.
+
 ### Backend
 - Same stack/discipline as the `book-bingo` project: Worker + D1, plain `wrangler`, no build step. App code and the D1 data are separate; `npm run deploy` never touches the log. Back up with `npm run db:backup` before any schema/data change.
+- **Inspecting / fixing live data**: `cd server && ./peek.sh` dumps the feeding + diaper log in readable local time. To change/remove an entry so both phones pick it up, **tombstone** it (`SET deleted=1, updated_at=<now_ms>`) — never hard-DELETE a row a phone may have cached, or the deletion won't sync. `peek.sh`'s header has copy-paste examples.
 
 ## Build / run / verify (no Xcode GUI required)
 ```bash

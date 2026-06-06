@@ -26,8 +26,9 @@ Forge workspace defaults (see `~/.claude/projects/-Users-christopherjohnson-Desk
 **Backend** (`server/`, Cloudflare Worker + D1 — same stack as book-bingo):
 - Deployed: **https://baby-feeding-sync.johnson-books.workers.dev**
 - D1 database `baby-feeding` (id `fdccb32b-3bb5-4eff-ae31-011f2b2effb9`). Schema in `server/schema.sql`.
-- API: `GET /api/health`, `GET /api/feedings?family=&since=`, `POST /api/feedings` (upsert, LWW). One shared `family` key pairs the two phones (baked into `AppConfig.familyID`) — no accounts.
+- API: `GET /api/health`, `GET/POST /api/feedings` (upsert, LWW), `GET/POST /api/diapers` (same model; `kind` = pee|poop). One shared `family` key pairs the two phones (baked into `AppConfig.familyID`) — no accounts.
 - Deploy with `cd server && npm run deploy`. Data is separate from code; deploys never touch the log. Back up with `npm run db:backup`.
+- **Inspect / fix live data from Claude Code**: `cd server && ./peek.sh` prints the feeding + diaper log in local time. To correct/remove an entry so it propagates to both phones, tombstone it (`UPDATE ... SET deleted=1, updated_at=<now_ms>`), don't hard-DELETE — the apps only sync removals via tombstones. Examples are in `peek.sh`'s header.
 
 ## Verification
 - **Build/run a simulator** (no GUI needed): `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild -project Baby_Feeding.xcodeproj -scheme Baby_Feeding -destination 'platform=iOS Simulator,name=iPhone 15' build CODE_SIGNING_ALLOWED=NO`, then `xcrun simctl install/launch` + `xcrun simctl io booted screenshot`.
@@ -51,6 +52,7 @@ Forge workspace defaults (see `~/.claude/projects/-Users-christopherjohnson-Desk
 - When starting a slice, mark it `**[in progress]**`. When done, move it to `## Done` with date + commit.
 
 ## Done
+- 2026-06-06 — **Diaper tracking + data admin**: added a calm pee/poop log (no timer/notifications/messaging) as a second tab. Backend gained a `diapers` table + `/api/diapers` (same sync model; feeding endpoints untouched). iOS: `DiaperStore` + `DiaperView`/`DiaperListView`/`DiaperEditView` (two log buttons, "today: X wet · Y dirty", editable list); root is now a `TabView` (Feeding | Diapers) with a `-startTab diapers` launch hook for headless verification. Added `server/peek.sh` to print the live feeding+diaper log in local time, plus documented tombstone-based fixes (`see and fix entries from Claude Code`). Verified: simulator build + diaper pull/merge/count display ("2 wet / 1 dirty" matched injected data) + feeding-endpoint regression check.
 - 2026-06-06 — **Bottle → 🤱**: replaced the bottle imagery (main screen + timeline markers) with the breastfeeding emoji, per the wife's preference (they're breastfeeding, avoiding bottles). Done via SF text/emoji — no new image assets. Old `babyBottle`/`512` assets remain in the catalog, now unused. Native iOS kept (paid Apple Developer account; reminders matter). Verified in simulator.
 - 2026-06-06 — **Backup + consolidation**: pushed the unpushed final commit (`00d02ff`, was on a detached HEAD) to GitHub; moved the project from `_archive` into `Forge/BabyFeeding/` as an active project; added PLAN.md + CLAUDE.md.
 - 2026-06-06 — **Shared Family Log slice**: added the Cloudflare Worker + D1 sync backend; refactored all feeding data into `FeedingStore` with optimistic-local + background sync (LWW, tombstones, legacy migration); fixed the edit-sort bug (editing a feeding used to sort ascending and make the main timer count from the oldest feed); made the announce-feeding text opt-in (off by default) via a Settings toggle; persisted the feeding interval across launches. Verified: simulator build + live server pull/merge/display.
